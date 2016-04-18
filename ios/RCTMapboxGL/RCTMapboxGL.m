@@ -13,6 +13,7 @@
 #import "RCTLog.h"
 
 @interface RCTMapboxGL ()
+@property (nonatomic) MGLOfflinePack *pack;
 @end
 
 @implementation RCTMapboxGL {
@@ -109,10 +110,32 @@ RCT_EXPORT_MODULE();
     singleTap.delegate = self;
     [_map addGestureRecognizer:singleTap];
     
+    // Setup offline pack notification handlers.
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(offlinePackProgressDidChange:) name:MGLOfflinePackProgressChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(offlinePackDidReceiveError:) name:MGLOfflinePackErrorNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(offlinePackDidReceiveMaximumAllowedMapboxTiles:) name:MGLOfflinePackMaximumMapboxTilesReachedNotification object:nil];
 
     [self updateMap];
     [self addSubview:_map];
     [self layoutSubviews];
+}
+
+-(void)createOfflinePack:(MGLCoordinateBounds)bounds styleURL:(NSURL*)styleURL fromZoomLevel:(double)fromZoomLevel toZoomLevel:(double)toZoomLevel name:(NSString*)name type:(NSString*)type metadata:(NSDictionary *)metadata
+{
+    
+    id <MGLOfflineRegion> region = [[MGLTilePyramidOfflineRegion alloc] initWithStyleURL:styleURL bounds:bounds fromZoomLevel:fromZoomLevel toZoomLevel:toZoomLevel];
+    
+    NSMutableDictionary *userInfo = [metadata mutableCopy];
+    userInfo[@"name"] = name;
+    NSData *context = [NSKeyedArchiver archivedDataWithRootObject:userInfo];
+    
+    [[MGLOfflineStorage sharedOfflineStorage] addPackForRegion:region withContext:context completionHandler:^(MGLOfflinePack *pack, NSError *error) {
+        if (error != nil) {
+            RCTLogError(@"Error: %@", error.localizedFailureReason);
+        } else {
+            [pack resume];
+        }
+    }];
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
@@ -507,6 +530,52 @@ RCT_EXPORT_MODULE();
     [_eventDispatcher sendInputEventWithName:@"onStartLoadingMap" body:event];
 }
 
+- (void)offlinePackProgressDidChange:(NSNotification *)notification {
+    
+    MGLOfflinePack *pack = notification.object;
+    NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+    MGLOfflinePackProgress progress = pack.progress;
+    
+    NSDictionary *event = @{ @"target": self.reactTag,
+                             @"src": @{
+                                     @"name": userInfo[@"name"],
+                                     @"countOfResourcesCompleted": @(progress.countOfResourcesCompleted),
+                                     @"countOfResourcesExpected": @(progress.countOfResourcesExpected),
+                                     @"countOfBytesCompleted": @(progress.countOfBytesCompleted),
+                                     @"maximumResourcesExpected": @(progress.maximumResourcesExpected)
+                                     }
+                             };
+    
+    [_eventDispatcher sendInputEventWithName:@"onSavePackageOfflineProgress" body:event];
+}
+
+- (void)offlinePackDidReceiveMaximumAllowedMapboxTiles:(NSNotification *)notification {
+    MGLOfflinePack *pack = notification.object;
+    NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+    uint64_t maximumCount = [notification.userInfo[MGLOfflinePackMaximumCountUserInfoKey] unsignedLongLongValue];
+    
+    NSDictionary *event = @{ @"target": self.reactTag,
+                             @"src": @{
+                                     @"name": userInfo[@"name"],
+                                     @"maxTiles": @(maximumCount)
+                                     }
+                             };
+    [_eventDispatcher sendInputEventWithName:@"onPackageReachMax" body:event];
+}
+
+- (void)offlinePackDidReceiveError:(NSNotification *)notification {
+    MGLOfflinePack *pack = notification.object;
+    NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+    NSError *error = notification.userInfo[MGLOfflinePackErrorUserInfoKey];
+    
+    NSDictionary *event = @{ @"target": self.reactTag,
+                             @"src": @{
+                                     @"name": userInfo[@"name"],
+                                     @"error": [error localizedDescription]
+                                     }
+                             };
+    [_eventDispatcher sendInputEventWithName:@"onSavePackageOfflineError" body:event];
+}
 
 
 - (void)mapView:(MGLMapView *)mapView didFailToLocateUserWithError:(NSError *)error

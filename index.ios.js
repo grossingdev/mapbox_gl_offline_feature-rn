@@ -4,9 +4,6 @@ var React = require('react-native');
 var { NativeModules, requireNativeComponent } = React;
 
 var MapMixins = {
-  removePack(mapRef, packName, callback) {
-    NativeModules.MapboxGLManager.removePack(React.findNodeHandle(this.refs[mapRef]), packName, callback);
-  },
   setDirectionAnimated(mapRef, heading) {
     NativeModules.MapboxGLManager.setDirectionAnimated(React.findNodeHandle(this.refs[mapRef]), heading);
   },
@@ -49,6 +46,17 @@ var MapMixins = {
   getDirection(mapRef, callback) {
     NativeModules.MapboxGLManager.getDirection(React.findNodeHandle(this.refs[mapRef]), callback);
   },
+  
+  savePackagesOffline(mapRef, options) {
+    NativeModules.MapboxGLManager.savePackagesOffline(React.findNodeHandle(this.refs[mapRef]), options);
+  },
+  loadPackagesOffline(mapRef, callback) {
+    NativeModules.MapboxGLManager.loadPackagesOffline(React.findNodeHandle(this.refs[mapRef]), callback);
+  },
+  removePackage(mapRef, packName, callback) {
+    NativeModules.MapboxGLManager.removePackage(React.findNodeHandle(this.refs[mapRef]), packName, callback);
+  },
+  
   mapStyles: NativeModules.MapboxGLManager.mapStyles,
   userTrackingMode: NativeModules.MapboxGLManager.userTrackingMode,
   userLocationVerticalAlignment: NativeModules.MapboxGLManager.userLocationVerticalAlignment,
@@ -88,6 +96,15 @@ var MapView = React.createClass({
   },
   _onLocateUserFailed(event: Event) {
     if (this.props.onLocateUserFailed) this.props.onLocateUserFailed(event.nativeEvent.src);
+  },
+  _onSavePackageOfflineProgress(event: Event) {
+    if (this.props._onSavePackageOfflineProgress) this.props.onSavePackageOfflineProgress(event.nativeEvent.src);
+  },
+  _onPackageReachMax(event: Event) {
+    if (this.props._onPackageReachMax) this.props.onPackageReachMax(event.nativeEvent.src);
+  },
+  _onSavePackageOfflineError(event: Event) {
+    if (this.props._onSavePackageOfflineError) this.props.onSavePackageOfflineError(event.nativeEvent.src);
   },
   propTypes: {
     showsUserLocation: React.PropTypes.bool,
@@ -141,8 +158,11 @@ var MapView = React.createClass({
     onLocateUserFailed: React.PropTypes.func,
     onLongPress: React.PropTypes.func,
     onTap: React.PropTypes.func,
+    onSavePackageOfflineProgress: React.PropTypes.func,
+    onPackageReachMax: React.PropTypes.func,
+    onSavePackageOfflineError: React.PropTypes.func,
     contentInset: React.PropTypes.array,
-    userLocationVerticalAlignment: React.PropTypes.number,
+    userLocationVerticalAlignment: React.PropTypes.number
   },
   getDefaultProps() {
     return {
@@ -177,6 +197,10 @@ var MapView = React.createClass({
         onFinishLoadingMap={this._onFinishLoadingMap}
         onStartLoadingMap={this._onStartLoadingMap}
         onLocateUserFailed={this._onLocateUserFailed}
+        onSavePackageOfflineProgress={this._onSavePackageOfflineProgress}
+        onPackageReachMax={this._onPackageReachMax}
+        onSavePackageOfflineError={this._onSavePackageOfflineError}
+      />
     );
   }
 });

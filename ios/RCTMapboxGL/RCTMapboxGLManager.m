@@ -45,6 +45,9 @@ RCT_EXPORT_MODULE();
              @"onFinishLoadingMap",
              @"onStartLoadingMap",
              @"onLocateUserFailed",
+             @"onSavePackageOfflineProgress",
+             @"onPackageReachMax",
+             @"onSavePackageOfflineError"
              ];
 }
 
@@ -165,6 +168,98 @@ RCT_CUSTOM_VIEW_PROPERTY(compassIsHidden, BOOL, RCTMapboxGL)
 {
     BOOL value = [json boolValue];
     [view setCompassVisibility:value ? true : false];
+}
+
+RCT_EXPORT_METHOD(savePackagesOffline:(nonnull NSNumber *)reactTag
+                  options:(NSDictionary*)options)
+{
+
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        if ([mapView isKindOfClass:[RCTMapboxGL class]]) {
+            
+            if ([options objectForKey:@"name"] == nil) {
+                return RCTLogError(@"Name is required.");
+            }
+            if ([options objectForKey:@"minZoomLevel"] == nil) {
+                return RCTLogError(@"minZoomLevel is required.");
+            }
+            if ([options objectForKey:@"maxZoomLevel"] == nil) {
+                return RCTLogError(@"maxZoomLevel is required.");
+            }
+            if ([options objectForKey:@"bounds"] == nil) {
+                return RCTLogError(@"bounds is required.");
+            }
+            if ([options objectForKey:@"styleURL"] == nil) {
+                return RCTLogError(@"styleURL is required.");
+            }
+            if (!([[options valueForKey:@"type"] isEqualToString:@"bbox"])) {
+                return RCTLogError(@"Offline type %@ not supported. Only type `bbox` supported.", [options valueForKey:@"type"]);
+            }
+            
+            NSArray *b = [options valueForKey:@"bounds"];
+            MGLCoordinateBounds bounds = MGLCoordinateBoundsMake(CLLocationCoordinate2DMake([b[0] floatValue], [b[1] floatValue]), CLLocationCoordinate2DMake([b[2] floatValue], [b[3] floatValue]));
+            [mapView createOfflinePack:bounds styleURL:[NSURL URLWithString:[options valueForKey:@"styleURL"]] fromZoomLevel:[[options valueForKey:@"minZoomLevel"] floatValue] toZoomLevel:[[options valueForKey:@"maxZoomLevel"] floatValue] name:[options valueForKey:@"name"] type:[options valueForKey:@"type"] metadata:[options valueForKey:@"metadata"]];
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(loadPackagesOffline:(nonnull NSNumber *)reactTag
+                  callback:(RCTResponseSenderBlock)callback)
+{
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        if ([mapView isKindOfClass:[RCTMapboxGL class]]) {
+            RCTMapboxGL *mapView = viewRegistry[reactTag];
+            NSMutableArray* callbackArray = [NSMutableArray new];
+            
+            MGLOfflinePack *packs = [MGLOfflineStorage sharedOfflineStorage].packs;
+            
+            for (MGLOfflinePack *pack in packs) {
+                NSMutableDictionary *packDict = [NSMutableDictionary new];
+                NSMutableDictionary *userInfo = [[NSKeyedUnarchiver unarchiveObjectWithData:pack.context] mutableCopy];
+                [packDict setObject:userInfo[@"name"] forKey:@"name"];
+                [userInfo removeObjectForKey:@"name"];
+                [packDict setObject:userInfo forKey:@"metadata"];
+                [packDict setObject:@(pack.progress.countOfBytesCompleted) forKey:@"countOfBytesCompleted"];
+                [packDict setObject:@(pack.progress.countOfResourcesCompleted) forKey:@"countOfResourcesCompleted"];
+                [callbackArray addObject:packDict];
+            }
+
+            callback(@[[NSNull null], callbackArray]);
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(removePackage:(nonnull NSNumber *)reactTag
+                  packName:(NSString*)packName
+                  callback:(RCTResponseSenderBlock)callback)
+{
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        if ([mapView isKindOfClass:[RCTMapboxGL class]]) {
+            RCTMapboxGL *mapView = viewRegistry[reactTag];
+            
+            MGLOfflinePack *packs = [MGLOfflineStorage sharedOfflineStorage].packs;
+            BOOL hasDeletedAPack = NO;
+            
+            for (MGLOfflinePack *pack in packs) {
+                NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+                if (userInfo[@"name"] == packName) {
+                    [[MGLOfflineStorage sharedOfflineStorage] removePack:pack withCompletionHandler:^(NSError * _Nullable error) {
+                        if (error != nil) {
+                            RCTLogError(@"Error: %@", error.localizedFailureReason);
+                        } else {
+                            BOOL hasDeletedAPack = YES;
+                            NSMutableDictionary *deletedObject = [NSMutableDictionary new];
+                            [deletedObject setObject:userInfo[@"name"] forKey:@"deleted"];
+                            return callback(@[[NSNull null], deletedObject]);
+                        }
+                    }];
+                }
+            }
+        }
+    }];
 }
 
 

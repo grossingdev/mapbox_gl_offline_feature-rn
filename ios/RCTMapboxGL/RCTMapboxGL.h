@@ -43,6 +43,7 @@
 - (void)setCompassVisibility:(BOOL)isVisible;
 - (double)zoomLevel;
 - (double)direction;
+- (void) createOfflinePack:(MGLCoordinateBounds)bounds styleURL:(NSURL*)styleURL fromZoomLevel:(double)fromZoomLevel toZoomLevel:(double)toZoomLevel name:(NSString*)name type:(NSString*)type metadata:(NSDictionary*)metadata;
 - (CLLocationCoordinate2D)centerCoordinate;
 @property (nonatomic) MGLAnnotationVerticalAlignment userLocationVerticalAlignment;
 @property (nonatomic) UIEdgeInsets contentInset;
