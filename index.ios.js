@@ -57,7 +57,7 @@ var MapMixins = {
     NativeModules.MapboxGLManager.removePackage(React.findNodeHandle(this.refs[mapRef]), packName, callback);
   },
   removeAllPackages(mapRef, callback) {
-    NativeModules.MapboxGLManager.removePackage(React.findNodeHandle(this.refs[mapRef]), callback);
+    NativeModules.MapboxGLManager.removeAllPackages(React.findNodeHandle(this.refs[mapRef]), callback);
   },
   mapStyles: NativeModules.MapboxGLManager.mapStyles,
   userTrackingMode: NativeModules.MapboxGLManager.userTrackingMode,
