@@ -98,13 +98,13 @@ var MapView = React.createClass({
     if (this.props.onLocateUserFailed) this.props.onLocateUserFailed(event.nativeEvent.src);
   },
   _onSavePackageOfflineProgress(event: Event) {
-    if (this.props._onSavePackageOfflineProgress) this.props.onSavePackageOfflineProgress(event.nativeEvent.src);
+    if (this.props.onSavePackageOfflineProgress) this.props.onSavePackageOfflineProgress(event.nativeEvent.src);
   },
   _onPackageReachMax(event: Event) {
-    if (this.props._onPackageReachMax) this.props.onPackageReachMax(event.nativeEvent.src);
+    if (this.props.onPackageReachMax) this.props.onPackageReachMax(event.nativeEvent.src);
   },
   _onSavePackageOfflineError(event: Event) {
-    if (this.props._onSavePackageOfflineError) this.props.onSavePackageOfflineError(event.nativeEvent.src);
+    if (this.props.onSavePackageOfflineError) this.props.onSavePackageOfflineError(event.nativeEvent.src);
   },
   propTypes: {
     showsUserLocation: React.PropTypes.bool,
