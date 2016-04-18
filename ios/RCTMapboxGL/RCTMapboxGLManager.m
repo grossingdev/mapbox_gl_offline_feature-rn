@@ -262,7 +262,33 @@ RCT_EXPORT_METHOD(removePackage:(nonnull NSNumber *)reactTag
     }];
 }
 
-
+RCT_EXPORT_METHOD(removeAllPackages:(nonnull NSNumber *)reactTag
+                  callback:(RCTResponseSenderBlock)callback)
+{
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        if ([mapView isKindOfClass:[RCTMapboxGL class]]) {
+            RCTMapboxGL *mapView = viewRegistry[reactTag];
+            
+            MGLOfflinePack *packs = [MGLOfflineStorage sharedOfflineStorage].packs;
+            BOOL hasDeletedAPack = NO;
+            
+            for (MGLOfflinePack *pack in packs) {
+                NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
+                [[MGLOfflineStorage sharedOfflineStorage] removePack:pack withCompletionHandler:^(NSError * _Nullable error) {
+                    if (error != nil) {
+                        RCTLogError(@"Error: %@", error.localizedFailureReason);
+                    } else {
+                        BOOL hasDeletedAPack = YES;
+                        NSMutableDictionary *deletedObject = [NSMutableDictionary new];
+                        [deletedObject setObject:userInfo[@"name"] forKey:@"deleted"];
+                        return callback(@[[NSNull null], deletedObject]);
+                    }
+                }];
+            }
+        }
+    }];
+}
 
 RCT_EXPORT_METHOD(setZoomLevelAnimated:(nonnull NSNumber *)reactTag
                   zoomLevel:(double)zoomLevel)
