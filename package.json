@@ -1,46 +1,6 @@
 {
-  "_args": [
-    [
-      "react-native-mapbox-gl@git://github.com/mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-      "/Volumes/MacData/Project/2016/react-native/Gendrin"
-    ]
-  ],
-  "_from": "git://github.com/mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-  "_id": "react-native-mapbox-gl@4.0.0",
-  "_inCache": true,
-  "_installable": true,
-  "_location": "/react-native-mapbox-gl",
-  "_phantomChildren": {},
-  "_requested": {
-    "hosted": {
-      "directUrl": "https://raw.githubusercontent.com/mapbox/react-native-mapbox-gl/5004d008b7913420b170691eed2d3c8ab9af9b47/package.json",
-      "gitUrl": "git://github.com/mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-      "httpsUrl": "git+https://github.com/mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-      "shortcut": "github:mapbox/react-native-mapbox-gl#5004d008b7913420b170691eed2d3c8ab9af9b47",
-      "ssh": "git@github.com:mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-      "sshUrl": "git+ssh://git@github.com/mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-      "type": "github"
-    },
-    "name": "react-native-mapbox-gl",
-    "raw": "react-native-mapbox-gl@git://github.com/mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-    "rawSpec": "git://github.com/mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-    "scope": null,
-    "spec": "git://github.com/mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-    "type": "hosted"
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "git://github.com/mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-  "_shasum": "7d1b81f11f5b4e568d806fbe3cb306aadbd5d22b",
-  "_shrinkwrap": null,
-  "_spec": "react-native-mapbox-gl@git://github.com/mapbox/react-native-mapbox-gl.git#5004d008b7913420b170691eed2d3c8ab9af9b47",
-  "_where": "/Volumes/MacData/Project/2016/react-native/Gendrin",
   "author": {
     "name": "Bobby Sudekum"
-  },
-  "bugs": {
-    "url": "https://github.com/mapbox/react-native-mapbox-gl/issues"
   },
   "dependencies": {
     "babel-eslint": "^4.1.6"
@@ -52,8 +12,6 @@
     "eslint-config-strict-react": "^4.0.0",
     "eslint-plugin-react": "^3.11.3"
   },
-  "gitHead": "5004d008b7913420b170691eed2d3c8ab9af9b47",
-  "homepage": "https://github.com/mapbox/react-native-mapbox-gl#readme",
   "keywords": [
     "android",
     "gl",
@@ -75,10 +33,6 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mapbox/react-native-mapbox-gl.git"
-  },
-  "scripts": {
-    "lint": "eslint --no-eslintrc -c .eslintrc index.ios.js index.android.js ios/example.js android/example.js",
-    "test": "npm run lint"
   },
   "version": "4.0.0"
 }
