@@ -394,6 +394,10 @@ RCT_EXPORT_MODULE();
     return ([title length] != 0 || [subtitle length] != 0);
 }
 
+-(MGLCoordinateBounds)getVisibleCoordinateBounds {
+  return _map.visibleCoordinateBounds;
+}
+
 -(CLLocationCoordinate2D)centerCoordinate {
     return _map.centerCoordinate;
 }

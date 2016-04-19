@@ -102,7 +102,6 @@ RCT_EXPORT_METHOD(getCenterCoordinateZoomLevel:(nonnull NSNumber *)reactTag
 
         [callbackDict setValue:@(region.latitude) forKey:@"latitude"];
         [callbackDict setValue:@(region.longitude) forKey:@"longitude"];
-        [callbackDict setValue:@(region.longitude) forKey:@"longitude"];
         [callbackDict setValue:@(zoom) forKey:@"zoom"];
 
         callback(@[callbackDict]);
@@ -290,6 +289,27 @@ RCT_EXPORT_METHOD(removeAllPackages:(nonnull NSNumber *)reactTag
     }];
 }
 
+RCT_EXPORT_METHOD(getVisibleCoordinateBounds:(nonnull NSNumber *)reactTag
+                  callback:(RCTResponseSenderBlock)callback)
+{
+    [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
+        RCTMapboxGL *mapView = viewRegistry[reactTag];
+        bounds=_map.visibleCoordinateBounds;
+
+        NSMutableDictionary* callbackDict = [NSMutableDictionary new];
+        MGLCoordinateBounds bounds = [mapView getVisibleCoordinateBounds];
+        double zoom = [mapView zoomLevel];
+
+        [callbackDict setValue:@(bounds.sw.longitude) forKey:@"sw_lon"];
+        [callbackDict setValue:@(bounds.sw.latitude) forKey:@"sw_lat"];
+        [callbackDict setValue:@(bounds.ne.longitude) forKey:@"ne_lon"];
+        [callbackDict setValue:@(bounds.ne.latitude) forKey:@"ne_lat"];
+        [callbackDict setValue:@(zoom) forKey:@"zoom"];
+
+        callback(@[callbackDict]);
+    }];
+}
+
 RCT_EXPORT_METHOD(setZoomLevelAnimated:(nonnull NSNumber *)reactTag
                   zoomLevel:(double)zoomLevel)
 {
@@ -442,7 +462,7 @@ RCT_EXPORT_METHOD(addAnnotations:(nonnull NSNumber *)reactTag
         RCTMapboxGL *mapView = viewRegistry[reactTag];
         if([mapView isKindOfClass:[RCTMapboxGL class]]) {
             NSMutableArray* annotationsArray = [NSMutableArray array];
-            id annotationObject;
+            id annotationObject;x
             NSEnumerator *enumerator = [annotations objectEnumerator];
 
             while (annotationObject = [enumerator nextObject]) {

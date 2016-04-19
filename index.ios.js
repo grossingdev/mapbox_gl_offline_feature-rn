@@ -59,6 +59,9 @@ var MapMixins = {
   removeAllPackages(mapRef, callback) {
     NativeModules.MapboxGLManager.removeAllPackages(React.findNodeHandle(this.refs[mapRef]), callback);
   },
+  getVisibleCoordinateBounds(mapRef, callback) {
+    NativeModules.MapboxGLManager.getVisibleCoordinateBounds(React.findNodeHandle(this.refs[mapRef]), callback);
+  },
   mapStyles: NativeModules.MapboxGLManager.mapStyles,
   userTrackingMode: NativeModules.MapboxGLManager.userTrackingMode,
   userLocationVerticalAlignment: NativeModules.MapboxGLManager.userLocationVerticalAlignment,
