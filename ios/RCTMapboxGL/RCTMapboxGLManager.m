@@ -271,7 +271,12 @@ RCT_EXPORT_METHOD(removeAllPackages:(nonnull NSNumber *)reactTag
             
             MGLOfflinePack *packs = [MGLOfflineStorage sharedOfflineStorage].packs;
             BOOL hasDeletedAPack = NO;
-            
+			
+            NSMutableArray* callbackArray = [NSMutableArray new];
+            static int nCount ;
+            static int packSize;
+            nCount = 0;
+            packSize = [[MGLOfflineStorage sharedOfflineStorage].packs count];
             for (MGLOfflinePack *pack in packs) {
                 NSDictionary *userInfo = [NSKeyedUnarchiver unarchiveObjectWithData:pack.context];
                 [[MGLOfflineStorage sharedOfflineStorage] removePack:pack withCompletionHandler:^(NSError * _Nullable error) {
@@ -281,9 +286,14 @@ RCT_EXPORT_METHOD(removeAllPackages:(nonnull NSNumber *)reactTag
                         BOOL hasDeletedAPack = YES;
                         NSMutableDictionary *deletedObject = [NSMutableDictionary new];
                         [deletedObject setObject:userInfo[@"name"] forKey:@"deleted"];
-                        return callback(@[[NSNull null], deletedObject]);
+						            [callbackArray addObject:deletedObject];
                     }
+                    if (nCount == packSize - 1) {
+                      callback(@[[NSNull null], callbackArray]);
+                    }
+                    nCount ++;
                 }];
+				
             }
         }
     }];
@@ -462,7 +472,7 @@ RCT_EXPORT_METHOD(addAnnotations:(nonnull NSNumber *)reactTag
         RCTMapboxGL *mapView = viewRegistry[reactTag];
         if([mapView isKindOfClass:[RCTMapboxGL class]]) {
             NSMutableArray* annotationsArray = [NSMutableArray array];
-            id annotationObject;x
+            id annotationObject;
             NSEnumerator *enumerator = [annotations objectEnumerator];
 
             while (annotationObject = [enumerator nextObject]) {
