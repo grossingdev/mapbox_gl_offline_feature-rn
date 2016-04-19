@@ -304,7 +304,6 @@ RCT_EXPORT_METHOD(getVisibleCoordinateBounds:(nonnull NSNumber *)reactTag
 {
     [_bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *, RCTMapboxGL *> *viewRegistry) {
         RCTMapboxGL *mapView = viewRegistry[reactTag];
-        bounds=_map.visibleCoordinateBounds;
 
         NSMutableDictionary* callbackDict = [NSMutableDictionary new];
         MGLCoordinateBounds bounds = [mapView getVisibleCoordinateBounds];
